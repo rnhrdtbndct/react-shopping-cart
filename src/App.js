@@ -1,10 +1,10 @@
 import './App.css';
-import PersistentDrawerRight from './components/navbar';
+import MainPage from './components/main-page';
 
 function App() {
   return (
     <div className='App'>
-        <PersistentDrawerRight />
+        <MainPage />
     </div>
   );
 }

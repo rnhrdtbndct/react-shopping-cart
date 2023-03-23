@@ -1,22 +1,12 @@
 .App {
   display: flex;
-}
-
-.selectionPage{
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: start;
-  padding-top: 100px;
-  width: 100vw;
-  height: 100vh;
-}
-
-.cart{
-  display: flex;
   margin: auto;
   justify-content: center;
   align-items: center;
-  background-color: green; 
-  width: 20%;
-  height: 100vh;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }

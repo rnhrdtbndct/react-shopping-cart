@@ -71,4 +71,8 @@ const items = [
     },
 ]
 
+Object.defineProperty(items, "quantity", {
+    writable: true
+  });
+
 export default items;

@@ -11,9 +11,10 @@ import IconButton from '@mui/material/IconButton';
 import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import ItemCard from './item_card';
+import {ItemCard, cartItems} from './item_card';
 import { Grid } from '@mui/material';
 import items from '../data'
+import CartItemCard from './cart_item_card';
 
 const drawerWidth = 400;
 
@@ -62,7 +63,7 @@ const DrawerHeader = styled('div')(({ theme }) => ({
   justifyContent: 'flex-start',
 }));
 
-export default function PersistentDrawerRight() {
+export default function MainPage() {
   const theme = useTheme();
   const [open, setOpen] = React.useState(false);
 
@@ -88,7 +89,7 @@ export default function PersistentDrawerRight() {
             onClick={handleDrawerOpen}
             sx={{ ...(open && { display: 'none' }) }}
           >
-            <ShoppingCartOutlinedIcon style={{fontSize: '32px',}}/>
+            <ShoppingCartOutlinedIcon style={{fontSize: '32px'}}/>
           </IconButton>
         </Toolbar>
       </AppBar>
@@ -96,16 +97,16 @@ export default function PersistentDrawerRight() {
       <Main open={open}>
         <DrawerHeader />
         <Grid container columns={{xs:0}} spacing={3} justifyContent="center">
-            {
-                items.map((item) => {
-                    return(
-                        <Grid item xs={2}>
-                            <ItemCard key={item.id} image={item.image} name={item.name} price={item.price.toFixed(2)} category={item.category}/>
-                        </Grid>
-                    )
-                })
-            }
-            </Grid>
+        {
+          items.map((item) => {
+            return(
+              <Grid item xs={2}>
+                  <ItemCard key={item.id} id={item.id} image={item.image} name={item.name} quantity={item.quantity} price={item.price.toFixed(2)} category={item.category}/>
+              </Grid>
+            )
+          })
+        }
+        </Grid>
       </Main>
 
       <Drawer
@@ -124,13 +125,19 @@ export default function PersistentDrawerRight() {
           <IconButton onClick={handleDrawerClose}>
             {theme.direction === 'rtl' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
           </IconButton>
-          <Typography variant="h6" noWrap sx={{ flexGrow: 1 }} component="div">
+          <Typography variant="h6" fontWeight="bold" noWrap sx={{ flexGrow: 1 }} component="div">
             Cart
           </Typography>
         </DrawerHeader>
         <Divider />
         <List>
-         
+        {
+          cartItems.map((cartItem) => {
+            return(
+              <CartItemCard key={cartItem[0]} id={cartItem[0]} image={cartItem[1]} name={cartItem[2]} price={cartItem[3]} quantity={cartItem[4]} subTotal={cartItem[5].toFixed(2)} category={cartItem[6]}/>
+            )
+          })
+        }
         </List>
       </Drawer>
     </Box>
