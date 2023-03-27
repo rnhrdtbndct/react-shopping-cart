@@ -1,6 +1,7 @@
-import * as React from 'react';
-import { styled, useTheme } from '@mui/material/styles';
-import Box from '@mui/material/Box';
+import {React, useState, useEffect} from 'react';
+import { styled, useTheme, alpha } from '@mui/material/styles';
+import InputBase from '@mui/material/InputBase';
+import { Box, Button } from '@mui/material';
 import Drawer from '@mui/material/Drawer';
 import MuiAppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
@@ -11,8 +12,8 @@ import IconButton from '@mui/material/IconButton';
 import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import {ItemCard, cartItems} from './item_card';
-import { Grid } from '@mui/material';
+import SearchIcon from '@mui/icons-material/Search';
+import {ItemCard} from './item_card';
 import items from '../data'
 import CartItemCard from './cart_item_card';
 
@@ -60,13 +61,57 @@ const DrawerHeader = styled('div')(({ theme }) => ({
   padding: theme.spacing(0, 1),
   // necessary for content to be below app bar
   ...theme.mixins.toolbar,
-  justifyContent: 'flex-start',
+  justifyContent: 'center',
+}));
+
+const Search = styled('div')(({ theme }) => ({
+  position: 'relative',
+  borderRadius: theme.shape.borderRadius,
+  backgroundColor: alpha(theme.palette.common.white, 0.15),
+  '&:hover': {
+    backgroundColor: alpha(theme.palette.common.white, 0.25),
+  },
+  marginLeft: 0,
+  width: '100%',
+  [theme.breakpoints.up('sm')]: {
+    marginLeft: theme.spacing(1),
+    width: 'auto',
+  },
+}));
+
+const SearchIconWrapper = styled('div')(({ theme }) => ({
+  padding: theme.spacing(0, 2),
+  height: '100%',
+  position: 'absolute',
+  pointerEvents: 'none',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+}));
+
+const StyledInputBase = styled(InputBase)(({ theme }) => ({
+  color: 'inherit',
+  '& .MuiInputBase-input': {
+    padding: theme.spacing(1, 1, 1, 0),
+    // vertical padding + font size from searchIcon
+    paddingLeft: `calc(1em + ${theme.spacing(4)})`,
+    transition: theme.transitions.create('width'),
+    width: '100%',
+    [theme.breakpoints.up('sm')]: {
+      width: '12ch',
+      '&:focus': {
+        width: '20ch',
+      },
+    },
+  },
 }));
 
 export default function MainPage() {
   const theme = useTheme();
-  const [open, setOpen] = React.useState(false);
-
+  const [open, setOpen] = useState(false);
+  const [cartItems, setCartItems] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  
   const handleDrawerOpen = () => {
     setOpen(true);
   };
@@ -75,6 +120,31 @@ export default function MainPage() {
     setOpen(false);
   };
 
+  useEffect(() => {
+    const storedCartItems = JSON.parse(localStorage.getItem('cartItems'));
+    setCartItems(storedCartItems);
+  }, []);
+
+  const handleSearchInputChange = (event) => {
+    setSearchQuery(event.target.value);
+  };
+
+  const filteredItems = items.filter((item) => 
+   item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+   item.category.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const checkout = () => {
+    if(cartItems.length > 0){
+      localStorage.setItem('cartItems', JSON.stringify([]));
+      alert("Items checked out successfully!"); 
+      window.location.href = window.location.href;
+    }
+    else{
+      alert("No items to be checked out!")
+    }
+  }
+
   return (
     <Box sx={{ display: 'flex' }}>
       <AppBar position="fixed" open={open} style={{backgroundColor: '#194E48', color: '#FFFFFF'}}>
@@ -82,6 +152,15 @@ export default function MainPage() {
           <Typography variant="h6" noWrap sx={{ flexGrow: 1 }} component="div">
             RVB
           </Typography>
+          <Search onChange={handleSearchInputChange}>
+            <SearchIconWrapper>
+              <SearchIcon />
+            </SearchIconWrapper>
+            <StyledInputBase
+              placeholder="Search…"
+              inputProps={{ 'aria-label': 'search' }}
+            />
+          </Search>
           <IconButton
             color="inherit"
             aria-label="open drawer"
@@ -96,17 +175,15 @@ export default function MainPage() {
     
       <Main open={open}>
         <DrawerHeader />
-        <Grid container columns={{xs:0}} spacing={3} justifyContent="center">
-        {
-          items.map((item) => {
-            return(
-              <Grid item xs={2}>
-                  <ItemCard key={item.id} id={item.id} image={item.image} name={item.name} quantity={item.quantity} price={item.price.toFixed(2)} category={item.category}/>
-              </Grid>
-            )
-          })
-        }
-        </Grid>
+        <Box component="span" sx={{display: 'flex', flexWrap: 'wrap', justifyContent: 'center'}}>
+          {
+            filteredItems.map((item) => {
+              return(
+                <ItemCard key={item.id} id={item.id} image={item.image} name={item.name} quantity={item.quantity} price={item.price.toFixed(2)} category={item.category}/>
+              )
+            })
+          }
+        </Box>
       </Main>
 
       <Drawer
@@ -130,15 +207,17 @@ export default function MainPage() {
           </Typography>
         </DrawerHeader>
         <Divider />
-        <List>
-        {
-          cartItems.map((cartItem) => {
-            return(
-              <CartItemCard key={cartItem[0]} id={cartItem[0]} image={cartItem[1]} name={cartItem[2]} price={cartItem[3]} quantity={cartItem[4]} subTotal={cartItem[5].toFixed(2)} category={cartItem[6]}/>
-            )
-          })
-        }
-        </List>
+          <List sx={{height: '100vh', overflowY: 'scroll'}}>
+          {
+            cartItems.map((cartItem) => {
+              return(
+                <CartItemCard key={cartItem.id} id={cartItem.id} image={cartItem.image} name={cartItem.name} price={cartItem.price} quantity={cartItem.quantity} subTotal={cartItem.subtotal.toFixed(2)}/>
+              )
+            })
+          }
+          </List>
+        <Divider />
+          <Button variant="contained" sx={{m:2, backgroundColor: '#194E48',  '&:hover': {backgroundColor: '#98BA7D'}}} onClick={checkout}>Checkout</Button>
       </Drawer>
     </Box>
   );

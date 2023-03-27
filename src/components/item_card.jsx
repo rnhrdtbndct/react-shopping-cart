@@ -10,32 +10,48 @@ import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import { IconButton, OutlinedInput } from '@mui/material';
-
-let cartItems = [];
+import { useLocalStorage } from 'usehooks-ts';
 
 const ItemCard = (props) => {
   const [qty, setQty] = useState(1);
+  const [cartItems, setCartItems] = useLocalStorage('cartItems', []);
+  
 
-  function addQty(){
+  const addQty = () => {
     setQty(qty + 1);
   }
   
-  function decreaseQty(){
-  qty <= 1 ? setQty(1) : setQty(qty - 1);
+  const decreaseQty = () => {
+    qty <= 1 ? setQty(1) : setQty(qty - 1);
   }
   
-  function addToCart(){
-  let subTotal = props.price * qty;
-  let counter = 0;
-  
-  cartItems.push([counter, props.image, props.name, props.price, qty, subTotal]);
+  const addToCart = () => {
+    const index = cartItems.findIndex((cartItem) => cartItem.id === props.id);
+    let subTotal = props.price * qty;
 
-  setQty(1)
-  counter++;
+    if (index === -1) {
+      const newCartItem = {
+        id: props.id,
+        image: props.image,
+        name: props.name,
+        quantity: qty,
+        price: props.price,
+        subtotal: subTotal,
+      };
+
+      setCartItems([...cartItems, newCartItem]);
+    }
+    else {
+      const newCartItems = [...cartItems];
+      newCartItems[index].quantity += qty;
+      newCartItems[index].subtotal = newCartItems[index].quantity * newCartItems[index].price;
+
+      setCartItems(newCartItems);
+    }
   }
 
   return (
-    <Card sx={{ width: 250,}}>
+    <Card sx={{ width: 250, m:1, boxShadow: '1px 2px 9px #808080'}}>
     <CardMedia
       sx={{ height: 200 }}
       image={props.image}
@@ -67,11 +83,11 @@ const ItemCard = (props) => {
         </IconButton>
       </Box>
       <Box textAlign="end" width={125}>
-        <Button size="medium" variant="contained" startIcon={<ShoppingCartOutlinedIcon />} style={{backgroundColor: '#194E48'}} onClick={addToCart}>Add</Button>
+        <Button size="medium" variant="contained" startIcon={<ShoppingCartOutlinedIcon />} onClick={addToCart} style={{backgroundColor: '#194E48'}}>Add</Button>
       </Box>
     </CardActions>
   </Card>
   )
 }
 
-export {ItemCard, cartItems};
+export {ItemCard};

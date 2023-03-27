@@ -1,18 +1,18 @@
-import { React, useState} from 'react'
+import { React, useState, useEffect } from 'react';
 import {ListItem, ListItemAvatar, ListItemText, Avatar, Typography, IconButton} from '@mui/material';
 import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
-import {ItemCard, cartItems} from './item_card';
 
 const CartItemCard = (props) => {
-    function deleteItem () {
-        cartItems.splice(props.id, 1);
-        console.log(cartItems);
+    const deleteItem = () => {
+        const storedCartItems = JSON.parse(localStorage.getItem('cartItems'));
+        const newCartItems = storedCartItems.filter((cartItem) => cartItem.id !== props.id);
+        localStorage.setItem('cartItems', JSON.stringify(newCartItems));
     }
 
     return (
     <ListItem>
         <ListItemAvatar>
-            <Avatar variant="rounded" src={props.image} sx={{marginRight:'10px', width: '64px', height: '64px'}} />
+            <Avatar variant="rounded" src={props.image} sx={{marginRight:'10px', width: '98px', height: '98px'}} />
         </ListItemAvatar>
         <ListItemText>
             <Typography fontWeight="bold">
